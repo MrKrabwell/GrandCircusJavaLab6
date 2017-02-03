@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+
 public class Main {
 
     /*************************************
@@ -90,6 +91,12 @@ public class Main {
 
         // Build back the string, note this feature is only available from Java 8
         pigLatinString = Arrays.stream(strArray).collect(Collectors.joining(" "));
+
+        // Capitalize the first letter of the sentence
+        // TODO: only capitalize if a string has more than one word.
+        if (strArray.length != 1) {
+            pigLatinString = pigLatinString.substring(0,1).toUpperCase() + pigLatinString.substring(1);
+        }
 
         // Return the converted string
         return pigLatinString;
