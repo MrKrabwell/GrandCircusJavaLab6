@@ -68,8 +68,8 @@ public class Main {
             }
         }
 
-        // It should never reach here, but compile error if nothing is returned here.
-        return "Something went wrong...";
+        // If it gets here, then there are no vowels in the word, so just add "ay" to the end.
+        return englishWord + "ay";
     }
 
 
@@ -141,6 +141,7 @@ public class Main {
         // Welcome message
         System.out.println("Welcome to the Pig Latin Translator!\n");
 
+        // Continue the program until the user decides to quit.
         while (continueProgram) {
             // Get the string from the user
             userString = getUserString();
@@ -155,6 +156,9 @@ public class Main {
             // Ask the user if they want to continue
             continueProgram = askUserToContinue();
         }
+
+        // Exit message
+        System.out.println("Goodbye!\n");
 
     }
 }
