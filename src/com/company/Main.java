@@ -1,5 +1,7 @@
 package com.company;
 
+import sun.management.snmp.jvmmib.EnumJvmMemoryGCCall;
+
 import java.util.Scanner;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -13,10 +15,15 @@ public class Main {
     public static String getUserString() {
         // Variable declarations
         Scanner scnr = new Scanner(System.in);       // Scanner object for getting user input
+        String str = "";                             // String to hold input
 
-        // Prompt user and get string
-        System.out.print("Enter a line to be translated: ");
-        return scnr.nextLine();
+        // Prompt user and get string, until it is a valid input
+        while (str == null || str.isEmpty() || !str.matches(".*\\w.*")) {
+            System.out.print("Enter a line to be translated: ");
+            str = scnr.nextLine();
+        }
+
+        return str;
     }
 
 
@@ -24,10 +31,19 @@ public class Main {
      * This method gets the Pig Latin for a single word *
      ****************************************************/
     public static String getPigLatinWord(String englishWord) {
+        // determines whether first letter is capital letter or not.
+        boolean firstLetterCapital = (englishWord.charAt(0) != englishWord.toLowerCase().charAt(0));
 
-        // if word contains a number or special character:
-        if (englishWord.matches(".*\\d+.*") || englishWord.matches(".*\\W+.*")) {
-            // just return the same word
+        // determines whether entire word is capital letter or not.
+        // TODO: make it so it can take all capital letter as an input.
+        boolean entireWordCapital = (englishWord.equals(englishWord.toLowerCase()));
+
+        // determines whether the word is an contraction
+        boolean isContraction = englishWord.matches("^[a-zA-Z]+('[a-zA-Z]+)?$");
+
+        // if word contains a number or special character, but not a contraction:
+        if (englishWord.matches(".*\\d+.*") || (englishWord.matches(".*\\W+.*") && !isContraction)) {
+            // just return the same word, no need to translate.
             return englishWord;
         }
 
@@ -43,15 +59,21 @@ public class Main {
                   englishWord.charAt(0) == 'O' ||
                   englishWord.charAt(0) == 'U') {
 
-            // just add "way" to the end of the word
-            return (englishWord + "way");
+            // If first letter is capital, make sure to keep the capitalization
+            // else, just add "way" to the end of the word
+            if (firstLetterCapital) {
+                return (englishWord.toUpperCase().charAt(0) + englishWord.substring(1) + "way");
+            }
+            else {
+                return (englishWord + "way");
+            }
         }
 
-        // if consonant is first letter
+        // else, consonant is first letter
         else {
             // Loop through the world to see when the first vowel is
             for (int i = 0; i < englishWord.length(); i++) {
-                // if at index i, it is a vowel...
+                    // if at index i, it is a vowel...
                     if (     englishWord.charAt(i) == 'a' ||
                              englishWord.charAt(i) == 'e' ||
                              englishWord.charAt(i) == 'i' ||
@@ -62,15 +84,29 @@ public class Main {
                              englishWord.charAt(i) == 'I' ||
                              englishWord.charAt(i) == 'O' ||
                              englishWord.charAt(i) == 'U') {
-                        // move all consonants that appear before the first vowel to the end of the word
+                        // if first letter is capital, make sure to keep the capitalization,
+                        // else, move all consonants that appear before the first vowel to the end of the word
                         // then add "ay" to the end of the word.
-                        return (englishWord.substring(i) + englishWord.substring(0,i) + "ay");
+                        if (firstLetterCapital) {
+                            return (englishWord.toUpperCase().charAt(i) + englishWord.substring(i+1).toLowerCase() +
+                                    englishWord.substring(0,i).toLowerCase() + "ay");
+                        }
+                        else {
+                            return (englishWord.substring(i) + englishWord.substring(0,i) + "ay");
+                        }
                 }
             }
         }
 
-        // If it gets here, then there are no vowels in the word, so just add "ay" to the end.
-        return englishWord + "ay";
+        // If it gets here, then there are no vowels in the word.
+        // If first letter is capital, make sure to keep the capitalization,
+        // else, just add "ay" to the end.
+        if (firstLetterCapital) {
+            return englishWord.toUpperCase().charAt(0) + englishWord.substring(1) + "ay";
+        }
+        else {
+            return englishWord + "ay";
+        }
     }
 
 
@@ -82,7 +118,7 @@ public class Main {
         String pigLatinString = "";                            // String object for Pig Latin
 
         // Separate each word and put into an array
-        String[] strArray = strEnglish.split("\\s+");
+        String[] strArray = strEnglish.trim().split("\\s+");
 
         // Iterate through each word to translate into Pig Latin
         for (int i = 0; i < strArray.length; i++) {
@@ -92,8 +128,7 @@ public class Main {
         // Build back the string, note this feature is only available from Java 8
         pigLatinString = Arrays.stream(strArray).collect(Collectors.joining(" "));
 
-        // Capitalize the first letter of the sentence
-        // TODO: only capitalize if a string has more than one word.
+        // Capitalize the first letter of the sentence.  Don't capitalize if single word.
         if (strArray.length != 1) {
             pigLatinString = pigLatinString.substring(0,1).toUpperCase() + pigLatinString.substring(1);
         }
